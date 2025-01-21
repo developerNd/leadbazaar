@@ -17,7 +17,7 @@ const initialLeads = [
 ]
 
 export function LeadsContent() {
-  const [leads, setLeads] = useState(initialLeads)
+  const [leads] = useState(initialLeads)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 

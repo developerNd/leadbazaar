@@ -17,7 +17,7 @@ import {
   CheckCircle, Clock, Star, AlertCircle, Globe2, 
   Facebook, Linkedin, MonitorSmartphone, MessageSquare,
   Pencil, Trash, FileUp, FileDown, Search, Filter,
-  Settings2, Plus, Loader2, X, FileSpreadsheet, FileText,
+  Settings2, Plus, Loader2, X, FileSpreadsheet,
   CheckCircle2, Flame, ThermometerSun, Snowflake, Thermometer
 } from 'lucide-react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
@@ -133,13 +133,6 @@ const defaultStages = {
   'Broadcast Done': { color: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-100', icon: Globe },
   'Wrong Number': { color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100', icon: Phone },
   'Payment Received': { color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100', icon: CheckCircle },
-}
-
-// Add these interfaces
-interface Stage {
-  name: string;
-  color: string;
-  icon: any;
 }
 
 // Add source configuration
@@ -447,7 +440,7 @@ export default function LeadsPage() {
     const pageNumbers = []
     const maxVisiblePages = 5
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1)

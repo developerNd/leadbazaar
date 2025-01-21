@@ -10,15 +10,16 @@ import {
   LayoutDashboard, 
   Users, 
   MessageSquare, 
-  FileSpreadsheet, 
+  Bot, 
   Settings, 
-  BarChart, 
-  MessagesSquare,
+  BarChart3, 
+  Plug2, 
+  Calendar,
   ChevronLeft,
   ChevronRight,
   LogOut,
   Link as LinkIcon,
-  CalendarDays
+  MessagesSquare
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -26,9 +27,9 @@ const sidebarItems = [
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Live Chat', href: '/live-chat', icon: MessagesSquare },
   { name: 'Chatbot', href: '/chatbot', icon: MessageSquare },
-  { name: 'Meetings', href: '/meetings', icon: CalendarDays },
+  { name: 'Meetings', href: '/meetings', icon: Calendar },
   { name: 'Integrations', href: '/integrations', icon: LinkIcon },
-  { name: 'Analytics', href: '/analytics', icon: BarChart },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 

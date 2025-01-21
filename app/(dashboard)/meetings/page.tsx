@@ -3,10 +3,10 @@
 import * as React from 'react'
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage, AvatarGroup } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog"
 import {
@@ -39,18 +38,59 @@ import {
   Video,
   MapPin,
   Phone,
-  Calendar as CalendarIcon,
   RefreshCw,
   FileText,
   Edit,
   Save,
   X
 } from 'lucide-react'
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
+
+// Add TypeScript interfaces
+interface Lead {
+  name: string
+  email: string
+  phone: string
+  profession: string
+  company: string
+  state: string
+  requirements: string
+  avatar: string
+}
+
+interface TeamMember {
+  id: number
+  name: string
+  email: string
+  avatar: string
+  role: string
+}
+
+interface QuestionnaireItem {
+  question: string
+  answer: string
+}
+
+interface Meeting {
+  id: number
+  title: string
+  date: string
+  time: string
+  duration: string
+  lead: Lead
+  assignedTo: TeamMember
+  type: 'video' | 'phone' | 'in-person'
+  status: 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'rescheduled'
+  meetingLink?: string
+  agenda?: string[]
+  questionnaire?: QuestionnaireItem[]
+  source: string
+  notes?: string
+  outcome?: string
+  followUpDate?: string
+}
 
 // Dummy data for meetings with additional fields
-const upcomingMeetings = [
+const upcomingMeetings: Meeting[] = [
   {
     id: 1,
     title: "Product Demo",
@@ -68,6 +108,7 @@ const upcomingMeetings = [
       avatar: "https://www.svgrepo.com/show/65453/avatar.svg"
     },
     assignedTo: {
+      id: 1,
       name: "Alex Thompson",
       email: "alex@leadbajar.com",
       avatar: "https://www.svgrepo.com/show/65453/avatar.svg",
@@ -106,6 +147,7 @@ const upcomingMeetings = [
       avatar: "https://www.svgrepo.com/show/65453/avatar.svg"
     },
     assignedTo: {
+      id: 2,
       name: "Sarah Johnson",
       email: "sarah@leadbajar.com",
       avatar: "https://www.svgrepo.com/show/65453/avatar.svg",
@@ -123,7 +165,7 @@ const upcomingMeetings = [
   }
 ]
 
-const meetingHistory = [
+const meetingHistory: Meeting[] = [
   {
     id: 6,
     title: "Product Demo",
@@ -141,6 +183,7 @@ const meetingHistory = [
       avatar: "https://www.svgrepo.com/show/65453/avatar.svg"
     },
     assignedTo: {
+      id: 1,
       name: "Alex Thompson",
       email: "alex@leadbajar.com",
       avatar: "https://www.svgrepo.com/show/65453/avatar.svg",
@@ -171,6 +214,7 @@ const meetingHistory = [
       avatar: "https://www.svgrepo.com/show/65453/avatar.svg"
     },
     assignedTo: {
+      id: 2,
       name: "Sarah Johnson",
       email: "sarah@leadbajar.com",
       avatar: "https://www.svgrepo.com/show/65453/avatar.svg",
@@ -232,7 +276,7 @@ const teamMembers = [
   }
 ]
 
-function MeetingDetails({ meeting, onUpdate }: { meeting: any, onUpdate?: (updatedData: any) => void }) {
+function MeetingDetails({ meeting, onUpdate }: { meeting: Meeting, onUpdate?: (updatedData: Meeting) => void }) {
   const [isEditing, setIsEditing] = useState(false)
   const [notes, setNotes] = useState(meeting.notes || '')
   const [outcome, setOutcome] = useState(meeting.outcome || '')
@@ -433,12 +477,15 @@ function MeetingDetails({ meeting, onUpdate }: { meeting: any, onUpdate?: (updat
 }
 
 export default function MeetingsPage() {
-  const [meetings, setMeetings] = useState({
+  const [meetings, setMeetings] = useState<{
+    upcoming: Meeting[]
+    history: Meeting[]
+  }>({
     upcoming: upcomingMeetings,
     history: meetingHistory
   })
 
-  const handleMeetingUpdate = (updatedMeeting: any) => {
+  const handleMeetingUpdate = (updatedMeeting: Meeting) => {
     setMeetings(prev => ({
       upcoming: prev.upcoming.map(m => m.id === updatedMeeting.id ? updatedMeeting : m),
       history: prev.history.map(m => m.id === updatedMeeting.id ? updatedMeeting : m)

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Icons } from '@/components/icons'
 import { Badge } from "@/components/ui/badge"
-import { Trash2, Plus, Globe, Webhook, CheckCircle2, XCircle, RefreshCcw, ArrowDownToLine, Send, Pencil } from 'lucide-react'
+import { Trash2, Plus, Globe, Webhook, CheckCircle2, XCircle, RefreshCcw, ArrowDownToLine, Send } from 'lucide-react'
 
 interface WebhookConfig {
   id: string;
