@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Icons } from '@/components/icons'
 import { Badge } from "@/components/ui/badge"
-import { Trash2, Plus, Globe, Webhook, CheckCircle2, XCircle, RefreshCcw, ArrowDownToLine, Send } from 'lucide-react'
+import { Trash2, Plus, Globe, Webhook, CheckCircle2, XCircle, RefreshCcw, ArrowDownToLine, Send, X } from 'lucide-react'
+import { cn } from "@/lib/utils"
 
 interface WebhookConfig {
   id: string;
@@ -27,29 +28,44 @@ interface WebhookConfig {
   }[];
 }
 
-const integrations = [
-  // CRM Integrations
-  { id: 'salesforce', name: 'Salesforce', icon: 'salesforce', category: 'crm', color: '#00A1E0' },
-  { id: 'hubspot', name: 'HubSpot', icon: 'hubspot', category: 'crm', color: '#FF7A59' },
-  
-  // Marketing Integrations
-  { id: 'mailchimp', name: 'Mailchimp', icon: 'mailchimp', category: 'marketing', color: '#FFE01B' },
-  { id: 'facebook_leads', name: 'Facebook Lead Forms', icon: 'facebook', category: 'marketing', color: '#1877F2' },
-  
-  // Messaging Integrations
-  { id: 'whatsapp', name: 'WhatsApp Cloud API', icon: 'messageSquare', category: 'messaging', color: '#25D366' },
-  { id: 'messenger', name: 'Facebook Messenger', icon: 'facebook', category: 'messaging', color: '#1877F2' },
-  { id: 'sms', name: 'SMS Gateway', icon: 'messageSquare', category: 'messaging', color: '#6b7280' },
-  
-  // Payment Integrations
-  { id: 'razorpay', name: 'Razorpay', icon: 'creditCard', category: 'payments', color: '#2D72FE' },
-  { id: 'instamojo', name: 'Instamojo', icon: 'creditCard', category: 'payments', color: '#0A2540' },
-  { id: 'stripe', name: 'Stripe', icon: 'creditCard', category: 'payments', color: '#635BFF' },
-  
-  // Automation & Others
-  { id: 'zapier', name: 'Zapier', icon: 'zapier', category: 'automation', color: '#FF4A00' },
-  { id: 'calendly', name: 'Calendly', icon: 'calendly', category: 'scheduling', color: '#006BFF' },
-  { id: 'appointmentBooking', name: 'Our Appointment Booking', icon: 'calendar', category: 'scheduling', color: '#0070f3' },
+interface Integration {
+  id: string
+  name: string
+  icon: string
+  category: string
+  color: string
+  description: string
+  features: string[]
+}
+
+const integrations: Integration[] = [
+  {
+    id: 'salesforce',
+    name: 'Salesforce',
+    icon: 'cloud',
+    category: 'crm',
+    color: '#00A1E0',
+    description: 'Connect and sync data with Salesforce CRM',
+    features: ['Lead Sync', 'Contact Sync', 'Opportunity Tracking']
+  },
+  {
+    id: 'hubspot',
+    name: 'HubSpot',
+    icon: 'database',
+    category: 'crm',
+    color: '#FF7A59',
+    description: 'Integrate with HubSpot marketing and CRM tools',
+    features: ['Contact Management', 'Email Marketing', 'Analytics']
+  },
+  {
+    id: 'zapier',
+    name: 'Zapier',
+    icon: 'zap',
+    category: 'automation',
+    color: '#FF4A00',
+    description: 'Automate workflows with Zapier integration',
+    features: ['Custom Workflows', 'Multi-app Integration', 'Automated Tasks']
+  }
 ]
 
 const dummyLogs = [
@@ -106,8 +122,8 @@ export default function IntegrationsPage() {
       events: ['lead.created', 'lead.updated'],
       isActive: true,
       mapping: [
-        { sourceField: 'name', targetField: 'fullName' },
-        { sourceField: 'email', targetField: 'emailAddress' }
+        { sourceField: 'name', targetField: 'full_name' },
+        { sourceField: 'email', targetField: 'email_address' }
       ]
     }
   ])
@@ -187,7 +203,13 @@ export default function IntegrationsPage() {
 
   return (
     <div className="container mx-auto py-10 p-2 overflow-y-scroll h-full">
-      <h1 className="text-4xl font-bold mb-6">Integrations Hub</h1>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-4xl font-bold">Integrations</h1>
+          <p className="text-muted-foreground">Connect your favorite tools and services</p>
+        </div>
+      </div>
+
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="all">All</TabsTrigger>
@@ -204,74 +226,170 @@ export default function IntegrationsPage() {
               {integrations
                 .filter(integration => category === 'all' || integration.category === category)
                 .map(integration => (
-                  <Card key={integration.id} className="overflow-hidden">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center justify-between">
-                        <span className="flex items-center">
-                          {Icons[integration.icon as keyof typeof Icons] && (
-                            <div className="mr-2">
-                              {React.createElement(Icons[integration.icon as keyof typeof Icons], {
-                                className: "h-6 w-6",
-                                style: { color: integration.color }
-                              })}
-                            </div>
-                          )}
-                          {integration.name}
-                        </span>
+                  <Card 
+                    key={integration.id} 
+                    className={cn(
+                      "cursor-pointer transition-all",
+                      selectedIntegration === integration.id && "border-primary",
+                      activeIntegrations.includes(integration.id) && "bg-muted"
+                    )}
+                  >
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl">{integration.name}</CardTitle>
                         <Switch
                           checked={activeIntegrations.includes(integration.id)}
                           onCheckedChange={() => toggleIntegration(integration.id)}
                         />
-                      </CardTitle>
-                      <CardDescription>
-                        Connect and sync data with {integration.name}
-                      </CardDescription>
+                      </div>
+                      <CardDescription>{integration.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {activeIntegrations.includes(integration.id) && (
-                        <p className="text-sm text-green-600">Integration active</p>
-                      )}
+                      <p className="text-sm text-muted-foreground mb-4">{integration.features.join(', ')}</p>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => setSelectedIntegration(integration.id)}
+                      >
+                        Configure
+                      </Button>
                     </CardContent>
-                    <CardFooter>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" className="w-full" onClick={() => setSelectedIntegration(integration.id)}>
-                            Configure
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                          <DialogHeader>
-                            <DialogTitle>Configure {integration.name}</DialogTitle>
-                            <DialogDescription>
-                              Set up your integration with {integration.name}. Make sure you have your API credentials ready.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="apiKey" className="text-right">
-                                API Key
-                              </Label>
-                              <Input id="apiKey" className="col-span-3" />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="apiSecret" className="text-right">
-                                API Secret
-                              </Label>
-                              <Input id="apiSecret" type="password" className="col-span-3" />
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button type="submit">Save changes</Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </CardFooter>
                   </Card>
                 ))}
             </div>
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Show configuration panel when an integration is selected */}
+      {selectedIntegration && (
+        <Card className="mt-8">
+          <CardHeader className="relative">
+            <div className="absolute right-4 top-4">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setSelectedIntegration(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardTitle>Configuration</CardTitle>
+            <CardDescription>
+              Configure settings for {integrations.find(i => i.id === selectedIntegration)?.name}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label>API Key</Label>
+                  <Input type="text" placeholder="Enter your API key" />
+                </div>
+                <div className="space-y-2">
+                  <Label>API Secret</Label>
+                  <Input type="password" placeholder="Enter your API secret" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Environment</Label>
+                  <Select defaultValue="production">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select environment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sandbox">Sandbox</SelectItem>
+                      <SelectItem value="production">Production</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Sync Options</Label>
+                <div className="grid gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Auto Sync</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically sync data every hour
+                      </p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Real-time Updates</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive updates in real-time
+                      </p>
+                    </div>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Data Mapping</Label>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Source Field</TableHead>
+                      <TableHead>Target Field</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <Select defaultValue="name">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="name">Name</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="phone">Phone</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Select defaultValue="fullName">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="fullName">Full Name</SelectItem>
+                            <SelectItem value="emailAddress">Email Address</SelectItem>
+                            <SelectItem value="phoneNumber">Phone Number</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+                <Button variant="outline" className="w-full mt-2">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Field Mapping
+                </Button>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setSelectedIntegration(null)}>
+                  Cancel
+                </Button>
+                <Button>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="mt-12">
         <div className="flex items-center justify-between mb-6">

@@ -9,11 +9,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   LayoutDashboard, 
   Users, 
-  MessageSquare, 
-  Bot, 
+  MessageSquare,
   Settings, 
-  BarChart3, 
-  Plug2, 
+  BarChart3,
   Calendar,
   ChevronLeft,
   ChevronRight,

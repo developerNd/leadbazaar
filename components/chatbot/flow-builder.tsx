@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { ReactFlow, MiniMap, Controls, Background, useNodesState, useEdgesState, addEdge, Connection, Edge, NodeTypes } from '@xyflow/react'
+import { ReactFlow, MiniMap, Controls, Background, useNodesState, useEdgesState, addEdge, Connection, Edge, NodeTypes, ReactFlowInstance, OnNodesChange, OnEdgesChange } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
 import { Button } from '@/components/ui/button'
@@ -84,20 +84,13 @@ export default function FlowBuilder({ flowId }: FlowBuilderProps) {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [selectedNode, setSelectedNode] = useState<ChatbotNode | null>(null)
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
-  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null)
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance<ChatbotNode, ChatbotEdge> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [flowName, setFlowName] = useState('')
   const [flowDescription, setFlowDescription] = useState('')
   const [flowTrigger, setFlowTrigger] = useState('message')
 
-  // Load flow data if editing existing flow
-  useEffect(() => {
-    if (flowId !== 'new') {
-      loadFlow()
-    }
-  }, [flowId])
-
-  const loadFlow = async () => {
+  const loadFlow = useCallback(async () => {
     try {
       setIsLoading(true)
       const flow = await chatbotService.getFlow(flowId)
@@ -112,7 +105,13 @@ export default function FlowBuilder({ flowId }: FlowBuilderProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [flowId, setNodes, setEdges])
+
+  useEffect(() => {
+    if (flowId !== 'new') {
+      loadFlow()
+    }
+  }, [flowId, loadFlow])
 
   const saveFlow = async () => {
     try {
@@ -137,7 +136,6 @@ export default function FlowBuilder({ flowId }: FlowBuilderProps) {
     }
   }
 
-  // Update selected node when nodes change
   useEffect(() => {
     if (selectedNode) {
       const updatedNode = nodes.find(node => node.id === selectedNode.id)
@@ -173,7 +171,6 @@ export default function FlowBuilder({ flowId }: FlowBuilderProps) {
             ...newData,
           }
           
-          // Handle button updates for message nodes
           if (isMessageNode(node) && 'buttons' in newData) {
             updatedData.buttons = newData.buttons || []
           }
@@ -198,8 +195,8 @@ export default function FlowBuilder({ flowId }: FlowBuilderProps) {
         id: `${type}-${Date.now()}`,
         type,
         position: { 
-          x: centerX - 100, // Offset by half the node width
-          y: centerY - 50   // Offset by half the node height
+          x: centerX - 100,
+          y: centerY - 50
         },
         data: { 
           label: `New ${type}`, 
@@ -255,10 +252,10 @@ export default function FlowBuilder({ flowId }: FlowBuilderProps) {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
+            onNodesChange={onNodesChange as OnNodesChange<ChatbotNode>}
+            onEdgesChange={onEdgesChange as OnEdgesChange<ChatbotEdge>}
             onConnect={onConnect}
-            onNodeClick={onNodeClick}
+            onNodeClick={(event, node) => onNodeClick(event, node as ChatbotNode)}
             nodeTypes={nodeTypes}
             onInit={setReactFlowInstance}
             fitView

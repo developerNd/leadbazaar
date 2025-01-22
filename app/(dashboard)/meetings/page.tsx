@@ -420,7 +420,7 @@ function MeetingDetails({ meeting, onUpdate }: { meeting: Meeting, onUpdate?: (u
         <div className="border-b pb-4">
           <h4 className="font-semibold mb-2">Questionnaire Responses</h4>
           <div className="space-y-2">
-            {meeting.questionnaire.map((qa: any, index: number) => (
+            {meeting.questionnaire.map((qa: { question: string; answer: string }, index: number) => (
               <div key={index} className="bg-muted p-3 rounded-md">
                 <p className="text-sm font-medium">{qa.question}</p>
                 <p className="text-sm text-muted-foreground">{qa.answer}</p>

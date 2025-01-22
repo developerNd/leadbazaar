@@ -21,6 +21,7 @@ import {
   CheckCircle2, Flame, ThermometerSun, Snowflake, Thermometer
 } from 'lucide-react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 const columns = [
   { id: 'name', label: 'Name', icon: User },
@@ -43,7 +44,7 @@ interface ColumnMapping {
 // Add temperature configuration
 type TemperatureType = 'Hot' | 'Warm' | 'Cold';
 
-const temperatureConfig: Record<TemperatureType, { color: string; icon: any }> = {
+const temperatureConfig: Record<TemperatureType, { color: string; icon: LucideIcon }> = {
   'Hot': { color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100', icon: Flame },
   'Warm': { color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100', icon: ThermometerSun },
   'Cold': { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100', icon: Snowflake }
@@ -114,8 +115,8 @@ interface ImportStats {
 }
 
 // Add a function to generate unique IDs
-function generateUniqueId(prefix: string = 'lead'): string {
-  return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+function generateUniqueId(): number {
+  return Date.now()
 }
 
 const defaultStages = {
@@ -164,6 +165,17 @@ const iconMapping = {
   MessageSquare
 }
 
+// Type guard for temperature
+const isTemperatureType = (value: string): value is TemperatureType => {
+  return ['Hot', 'Warm', 'Cold'].includes(value as TemperatureType)
+}
+
+// Type guard for lead fields
+type LeadField = keyof Omit<Lead, 'id' | 'temperature'>
+const isLeadField = (field: string): field is LeadField => {
+  return ['name', 'email', 'phone', 'company', 'status', 'source', 'lastContact'].includes(field)
+}
+
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
   const [searchTerm, setSearchTerm] = useState('')
@@ -187,12 +199,12 @@ export default function LeadsPage() {
   const resultsSectionRef = useRef<HTMLDivElement>(null)
 
   // Add these states
-  const [stages, setStages] = useState<Record<string, { color: string; icon: any }>>(defaultStages)
+  const [stages, setStages] = useState<Record<string, { color: string; icon: LucideIcon }>>(defaultStages)
   const [showStageManager, setShowStageManager] = useState(false)
   const [newStageName, setNewStageName] = useState('')
   const [selectedColor, setSelectedColor] = useState('blue')
-  const [selectedIcon, setSelectedIcon] = useState('User')
-  const [editingLead, setEditingLead] = useState<any>(null)
+  const [selectedIcon] = useState<keyof typeof iconMapping>('User')
+  const [editingLead, setEditingLead] = useState<Lead | null>(null)
   const [showStageChange, setShowStageChange] = useState(false)
   const [editingStage, setEditingStage] = useState<string | null>(null)
   const [editedStageName, setEditedStageName] = useState('')
@@ -238,7 +250,8 @@ export default function LeadsPage() {
           leadField: 'skip'
         })))
         setShowMapping(true)
-      } catch (error) {
+      } catch (err) {
+        console.error('Failed to read CSV file:', err)
         setImportError('Failed to read CSV file. Please check the file format.')
       }
     }
@@ -350,9 +363,15 @@ export default function LeadsPage() {
             return null
           }
 
-          const lead: any = {
+          const lead: Lead = {
             id: generateUniqueId(),
+            name: '',
+            email: '',
+            phone: '',
+            company: '',
             status: 'New',
+            temperature: 'Warm',
+            source: '',
             lastContact: new Date().toISOString().split('T')[0],
           }
 
@@ -360,14 +379,19 @@ export default function LeadsPage() {
             if (mapping.leadField && mapping.leadField !== 'skip') {
               const csvIndex = csvHeaders.indexOf(mapping.csvHeader)
               if (csvIndex !== -1) {
-                lead[mapping.leadField] = row[csvIndex]
+                const value = row[csvIndex]
+                if (mapping.leadField === 'temperature' && isTemperatureType(value)) {
+                  lead.temperature = value as TemperatureType
+                } else if (isLeadField(mapping.leadField)) {
+                  lead[mapping.leadField] = value
+                }
               }
             }
           })
 
           stats.successfulRows++
           return lead
-        }).filter(Boolean)
+        }).filter((lead): lead is Lead => lead !== null)
 
         setImportStats(stats)
         if (newLeads.length > 0) {
@@ -383,7 +407,8 @@ export default function LeadsPage() {
           }, 100)
         }, 1000)
 
-      } catch (error) {
+      } catch (err) {
+        console.error('Failed to process CSV data:', err)
         setImportError('Failed to process CSV data')
         setShowGeneratingReport(false)
       } finally {
@@ -435,12 +460,14 @@ export default function LeadsPage() {
   const endIndex = startIndex + itemsPerPage
   const currentItems = filteredLeads.slice(startIndex, endIndex)
 
-  // Add pagination controls component
+  // Update pagination controls
   const PaginationControls = () => {
-    const pageNumbers = []
+    const pageNumbers: number[] = []
     const maxVisiblePages = 5
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+    const safeTotalPages = Math.max(1, totalPages || 1)
+    const safeCurrentPage = Math.min(currentPage, safeTotalPages)
+    let startPage = Math.max(1, safeCurrentPage - Math.floor(maxVisiblePages / 2))
+    const endPage = Math.min(safeTotalPages, startPage + maxVisiblePages - 1)
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1)
@@ -448,6 +475,10 @@ export default function LeadsPage() {
 
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i)
+    }
+
+    const handlePageChange = (page: number) => {
+      setCurrentPage(Math.min(Math.max(1, page), safeTotalPages))
     }
 
     return (
@@ -459,8 +490,8 @@ export default function LeadsPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
+            onClick={() => handlePageChange(1)}
+            disabled={safeCurrentPage === 1}
             className="hidden sm:flex"
           >
             <ChevronsLeft className="h-4 w-4" />
@@ -468,8 +499,8 @@ export default function LeadsPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
+            onClick={() => handlePageChange(safeCurrentPage - 1)}
+            disabled={safeCurrentPage === 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -478,9 +509,9 @@ export default function LeadsPage() {
             {startPage > 1 && (
               <>
                 <Button
-                  variant={currentPage === 1 ? "default" : "outline"}
+                  variant={safeCurrentPage === 1 ? "default" : "outline"}
                   size="icon"
-                  onClick={() => setCurrentPage(1)}
+                  onClick={() => handlePageChange(1)}
                   className="hidden sm:flex"
                 >
                   1
@@ -494,26 +525,26 @@ export default function LeadsPage() {
             {pageNumbers.map(number => (
               <Button
                 key={number}
-                variant={currentPage === number ? "default" : "outline"}
+                variant={safeCurrentPage === number ? "default" : "outline"}
                 size="icon"
-                onClick={() => setCurrentPage(number)}
+                onClick={() => handlePageChange(number)}
               >
                 {number}
               </Button>
             ))}
 
-            {endPage < totalPages && (
+            {endPage < safeTotalPages && (
               <>
-                {endPage < totalPages - 1 && (
+                {endPage < safeTotalPages - 1 && (
                   <div className="flex items-center px-2">...</div>
                 )}
                 <Button
-                  variant={currentPage === totalPages ? "default" : "outline"}
+                  variant={safeCurrentPage === safeTotalPages ? "default" : "outline"}
                   size="icon"
-                  onClick={() => setCurrentPage(totalPages)}
+                  onClick={() => handlePageChange(safeTotalPages)}
                   className="hidden sm:flex"
                 >
-                  {totalPages}
+                  {safeTotalPages}
                 </Button>
               </>
             )}
@@ -522,16 +553,16 @@ export default function LeadsPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(safeCurrentPage + 1)}
+            disabled={safeCurrentPage === safeTotalPages}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(safeTotalPages)}
+            disabled={safeCurrentPage === safeTotalPages}
             className="hidden sm:flex"
           >
             <ChevronsRight className="h-4 w-4" />
@@ -554,12 +585,14 @@ export default function LeadsPage() {
     }
   }
 
-  const handleStageChange = (leadId: number, newStage: string) => {
-    setLeads(prev => prev.map(lead => 
-      lead.id === leadId ? { ...lead, status: newStage } : lead
-    ))
-    setShowStageChange(false)
-    setEditingLead(null)
+  const handleStageChange = (leadId: number | undefined, newStage: string) => {
+    if (typeof leadId === 'number') {
+      setLeads(prev => prev.map(lead => 
+        lead.id === leadId ? { ...lead, status: newStage } : lead
+      ))
+      setShowStageChange(false)
+      setEditingLead(null)
+    }
   }
 
   const handleEditStage = (stageName: string) => {
@@ -1058,7 +1091,11 @@ export default function LeadsPage() {
                           "justify-start",
                           editingLead?.status === name && "border-blue-500"
                         )}
-                        onClick={() => handleStageChange(editingLead?.id, name)}
+                        onClick={() => {
+                          if (editingLead?.id !== undefined) {
+                            handleStageChange(editingLead.id, name)
+                          }
+                        }}
                       >
                         <div className="flex items-center gap-2">
                           {React.createElement(config.icon, { className: "h-4 w-4" })}

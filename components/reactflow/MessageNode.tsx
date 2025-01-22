@@ -12,7 +12,7 @@ interface MessageNodeData {
   }>;
 }
 
-function MessageNode({ data, id }: { data: MessageNodeData; id: string }) {
+function MessageNode({ data }: { data: MessageNodeData }) {
   return (
     <Card className="w-[200px]">
       <CardHeader className="p-2">
