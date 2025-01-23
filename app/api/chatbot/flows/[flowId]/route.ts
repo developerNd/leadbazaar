@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // Mock data - replace with database calls later
 const mockFlows = {
   'welcome': {
