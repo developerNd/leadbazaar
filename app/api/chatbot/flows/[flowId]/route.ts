@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-export const fetchCache = 'force-cache'
-
 // Mock data - replace with database calls later
 const mockFlows = {
   'welcome': {
