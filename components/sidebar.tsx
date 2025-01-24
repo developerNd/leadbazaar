@@ -57,7 +57,10 @@ export function Sidebar() {
           "flex h-14 items-center border-b px-4 transition-all duration-300",
           collapsed ? "justify-center" : "justify-between"
         )}>
-          <Link className="flex items-center gap-2 font-semibold" href="/">
+          <Link 
+            className="flex items-center gap-2 font-semibold" 
+            href={{ pathname: "/" } as const}
+          >
             <span className={cn(
               "text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent",
               collapsed && "hidden"
@@ -108,7 +111,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
               collapsed && "justify-center px-0"
             )}
           >
-            <Link href={item.href}>
+            <Link href={{ pathname: item.href } as const}>
               <item.icon className={cn("h-4 w-4", collapsed ? "mr-0" : "mr-2")} />
               {!collapsed && <span>{item.name}</span>}
             </Link>

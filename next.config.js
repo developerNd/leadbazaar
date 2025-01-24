@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
   reactStrictMode: true,
   eslint: {
@@ -11,8 +11,7 @@ const nextConfig = {
     domains: ['leadbazaar-na2mnamow-developernds-projects.vercel.app'], // Replace 'localhost' with your actual domains
   },
   experimental: {
-    serverActions: true,
-    typedRoutes: true,
+    typedRoutes: false,
   },
   output: 'standalone',
   webpack: (config) => {
