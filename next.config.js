@@ -17,7 +17,6 @@ const nextConfig = {
     serverComponentsExternalPackages: [],
     optimizePackageImports: ['@/components']
   },
-  output: 'export',
   webpack: (config) => {
     config.resolve = {
       ...config.resolve,
