@@ -10,9 +10,7 @@ const nextConfig = {
   images: {
     domains: ['leadbazaar-na2mnamow-developernds-projects.vercel.app'], // Replace 'localhost' with your actual domains
   },
-  experimental: {
-    appDir: true,
-  },
+  
 }
 
 module.exports = nextConfig 
