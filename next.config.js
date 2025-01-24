@@ -1,29 +1,28 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  experimental: {
-    serverActions: true,
-  },
   images: {
-    domains: ['localhost'],
+    domains: ['leadbazaar-na2mnamow-developernds-projects.vercel.app'], // Replace 'localhost' with your actual domains
   },
   webpack: (config) => {
     config.resolve = {
       ...config.resolve,
       alias: {
         ...config.resolve.alias,
-        '@': '.',
+        '@': path.resolve(__dirname),
       },
-    }
-    return config
+    };
+    return config;
   },
   reactStrictMode: true,
   swcMinify: true,
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
-  }
-}
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+};
 
-export default nextConfig; 
+export default nextConfig;
