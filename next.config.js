@@ -12,8 +12,11 @@ const nextConfig = {
   },
   experimental: {
     typedRoutes: false,
-    serverActions: true
+    serverActions: true,
+    serverComponentsExternalPackages: [],
+    optimizePackageImports: ['@/components']
   },
+  output: 'export',
   webpack: (config) => {
     config.resolve = {
       ...config.resolve,
