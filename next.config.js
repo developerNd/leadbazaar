@@ -12,8 +12,8 @@ const nextConfig = {
   },
   experimental: {
     typedRoutes: false,
+    serverActions: true
   },
-  output: 'standalone',
   webpack: (config) => {
     config.resolve = {
       ...config.resolve,
