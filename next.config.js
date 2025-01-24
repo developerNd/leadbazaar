@@ -11,13 +11,7 @@ const nextConfig = {
     domains: ['leadbazaar-na2mnamow-developernds-projects.vercel.app'], // Replace 'localhost' with your actual domains
     unoptimized: true
   },
-  experimental: {
-    typedRoutes: false,
-    serverActions: {
-      bodySizeLimit: '2mb'
-    }
-  },
-  serverExternalPackages: [],
+
   webpack: (config) => {
     config.resolve = {
       ...config.resolve,
