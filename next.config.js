@@ -9,6 +9,7 @@ const nextConfig = {
   },
   images: {
     domains: ['leadbazaar-na2mnamow-developernds-projects.vercel.app'], // Replace 'localhost' with your actual domains
+    unoptimized: true
   },
   experimental: {
     typedRoutes: false,
