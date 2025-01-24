@@ -13,10 +13,11 @@ const nextConfig = {
   },
   experimental: {
     typedRoutes: false,
-    serverActions: true,
-    serverComponentsExternalPackages: [],
-    optimizePackageImports: ['@/components']
+    serverActions: {
+      bodySizeLimit: '2mb'
+    }
   },
+  serverExternalPackages: [],
   webpack: (config) => {
     config.resolve = {
       ...config.resolve,
